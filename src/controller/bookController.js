@@ -4,7 +4,12 @@ const Book = require("../model/Book")
 // get all books
 exports.getAllBooks = async(req, res) => {
     try{
-        let listed = await Book.find();
+        let x = ['a', 'b', 'c'];
+        console.log(...x);  //lists out all the elements of x
+        // check query for filters
+        console.log(req.query);
+        // if there are filters, use them in model.find query
+        let listed = await Book.find(req.query);
         if(listed.length === 0){
             return res.status(404).json({
                 success: false,
@@ -54,8 +59,7 @@ exports.getBook = async(req, res) => {
 // create a book
 exports.createBook = async(req, res) => {
     try{
-        let bookObj = await req.body;
-        let created = await Book.create(bookObj);
+        let created = await Book.create(req.body);
         if(!created){
             return res.status(404).json({
                 success: false,

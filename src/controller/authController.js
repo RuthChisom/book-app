@@ -72,7 +72,7 @@ exports.registerNewUser = (req, res) => {
          // create a new user
         let created = User.create(userObj, (err, newUser) => {
             if(err){
-                return res.status(500).json({err});
+                return res.status(500).json({err}); //returns error once username is repeated even after correcting it
             }
             // hash user's password
             bcrypt.genSalt(10, (err, salt) =>{
