@@ -116,8 +116,6 @@ exports.registerNewUser = (req, res) => {
                 })
             })
         });
-        
-      
 }
 
 // get all users
@@ -142,4 +140,42 @@ exports.getAllUsers = async(req, res) => {
             error: error.message
         })
     }
+}
+
+exports.loginUser = (req, res) =>{
+    // check if user exists
+    User.findOne({userName: req.body.userName}, (err, foundUser) => {
+        if(err){
+            return res.status(500).json({err});
+        }
+        if(!foundUser){
+            return res.status(401).json({message: "Username Not Found!!"})
+        }
+        // check if password is correct - we cannot compare the password with equals because it is hashed
+        let match = bcrypt.compareSync(req.body.password, foundUser.password);
+        if(!match){
+            return res.status(401).json({message: "Incorrect Password"})
+        }
+        // create token and send to user
+        jwt.sign(
+            { 
+                id: foundUser.id,
+                userName: foundUser.userName,
+                firstName: foundUser.firstName,
+                lastName: foundUser.lastName,
+            },
+            SECRET, 
+            {expiresIn: expiry},
+            (err, token) => {
+                if(err){
+                    return res.status(500).json({err});
+                }
+                return res.status(200).json({
+                    message: "User Logged In Successfully",
+                    token
+                })
+            }
+        )
+    })
+    
 }
