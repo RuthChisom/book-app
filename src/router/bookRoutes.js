@@ -1,12 +1,12 @@
 const router = require('express').Router();
-const controller = require('../controller/bookController');
+const BookCtrl = require('../controller/bookController');
 const {authenticateUser} = require('../middleware/authentication');
 
 router
-.get("/", authenticateUser, controller.getAllBooks)
-.get("/:id", controller.getBook)
-.post("/", controller.createBook)
-.put("/:id", controller.updateBook)
-.delete("/:id", controller.deleteBook);
+.get("/", authenticateUser, BookCtrl.getAllBooks)
+.get("/:id", BookCtrl.getBook)
+.post("/", BookCtrl.createBook)
+.put("/:id", BookCtrl.updateBook)
+.delete("/:id", BookCtrl.deleteBook);
 
 module.exports = router;
