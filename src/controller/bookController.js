@@ -4,10 +4,8 @@ const Book = require("../model/Book")
 // get all books
 exports.getAllBooks = async(req, res) => {
     try{
-        let x = ['a', 'b', 'c'];
-        console.log(...x);  //lists out all the elements of x
-        // check query for filters
-        console.log(req.query);
+        // let x = ['a', 'b', 'c'];
+        // console.log(...x);  //lists out all the elements of x
         // if there are filters, use them in model.find query
         let listed = await Book.find(req.query);
         if(listed.length === 0){
@@ -22,10 +20,10 @@ exports.getAllBooks = async(req, res) => {
             books: listed
         })
     }catch(error){
+        console,error(error);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
-            error: error.message
+            message: "Internal Server Error!"
         })
     }
 }
@@ -48,10 +46,10 @@ exports.getBook = async(req, res) => {
             book: found
         })
     }catch(error){
+        console.error(err);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
-            error: error.message
+            message: "Internal Server Error!"
         })
     }
 }
@@ -72,10 +70,10 @@ exports.createBook = async(req, res) => {
             book: created
         })
     }catch(error){
+        console.error(error);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
-            error: error.message
+            message: "Internal Server Error!"
         })
     }
 }
@@ -98,10 +96,10 @@ exports.updateBook = async(req, res) => {
             book: updated
         })
     }catch(error){
+        console.error(err);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
-            error: error.message
+            message: "Internal Server Error!"
         })
     }
 }
@@ -123,10 +121,10 @@ exports.deleteBook = async(req, res) => {
             book: deleted
         })
     }catch(error){
+        console.error(error);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
-            error: error.message
+            message: "Internal Server Error!"
         })
     }
 }

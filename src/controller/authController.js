@@ -1,4 +1,4 @@
-const User = require("../model/user");
+const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -18,7 +18,8 @@ exports.createToken = (req, res) => {
                         {expiresIn: expiry},
                         (err,token) => {
                             if(err){
-                                return res.status(500).json({err});
+                                console.err(err);
+                                return res.status(500).json({message: "Failed to sign token!"});
                             }
                             // send token to user
                             return res.status(200).json({
@@ -49,7 +50,8 @@ exports.decodeToken = (req, res) => {
         SECRET,
         (err, decodedToken) => {
             if(err){
-                return res.status(500).json({err});
+                console.error(err);
+                return res.status(500).json({message: "Failed to verify token"});
             }
             return res.status(200).json({user: decodedToken});
         }
@@ -63,7 +65,8 @@ exports.registerNewUser = (req, res) => {
         // check if a user with this username exists
         User.findOne({userName: userObj.userName}, (err, existingUser) => {
             if(err){
-                return res.status(500).json({err});
+                console.error(err);
+                return res.status(500).json({message: "An error occured! Please try again later!"});
             }
             if(existingUser){
                 return res.status(400).json({message: "A user with this username already exists!!"});
@@ -72,22 +75,26 @@ exports.registerNewUser = (req, res) => {
          // create a new user
         let created = User.create(userObj, (err, newUser) => {
             if(err){
-                return res.status(500).json({err}); //returns error once username is repeated even after correcting it
+                console.error(err);
+                return res.status(500).json({message: "An error occured! Please try again later!"}); //returns error once username is repeated even after correcting it
             }
             // hash user's password
             bcrypt.genSalt(10, (err, salt) =>{
                 if(err){
-                    return res.status(500).json({err});
+                    console.error(err);
+                    return res.status(500).json({message: "Failed to salt password!"});
                 }
                 bcrypt.hash(req.body.password, salt, (err, hashedPassword) => {
                     if(err){
-                        return res.status(500).json({err});
+                        console.error({err});
+                        return res.status(500).json({message: "Failed to hash password!"});
                     }
                     // save password to db
                     newUser.password = hashedPassword;
                     newUser.save((err, savedUser) => {
                         if(err){
-                            return res.status(500).json({err});
+                            console.error({err});
+                            return res.status(500).json({message: "Failed to save user password!"});
                         }
                     })
                     // create jwt token for user
@@ -104,12 +111,13 @@ exports.registerNewUser = (req, res) => {
                         {expiresIn: expiry},
                         (err,token) => {
                             if(err){
-                                return res.status(500).json({err});
+                                console.error({err});
+                                return res.status(500).json({message: "Failed to sign token!"});
                             }
                             // send token to user
+                            console.log(token)
                             return res.status(200).json({
                                 message: "User Registration Successful",
-                                token: token
                             })
                         }
                         );
@@ -134,10 +142,10 @@ exports.getAllUsers = async(req, res) => {
             users: listed
         })
     }catch(error){
+        console.log(error);
         res.status(500).json({
             success: false,
-            message: "Internal Server Error!",
-            error: error.message
+            message: "Internal Server Error!"
         })
     }
 }
@@ -146,7 +154,8 @@ exports.loginUser = (req, res) =>{
     // check if user exists
     User.findOne({userName: req.body.userName}, (err, foundUser) => {
         if(err){
-            return res.status(500).json({err});
+            console.error({err});
+            return res.status(500).json({message: "Failed to sign token!"});
         }
         if(!foundUser){
             return res.status(401).json({message: "Username Not Found!!"})
@@ -163,12 +172,14 @@ exports.loginUser = (req, res) =>{
                 userName: foundUser.userName,
                 firstName: foundUser.firstName,
                 lastName: foundUser.lastName,
+                role: foundUser.role,
             },
             SECRET, 
             {expiresIn: expiry},
             (err, token) => {
                 if(err){
-                    return res.status(500).json({err});
+                    console.error({err});
+                    return res.status(500).json({message: "Failed to sign token!"});
                 }
                 return res.status(200).json({
                     message: "User Logged In Successfully",
