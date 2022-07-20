@@ -4,9 +4,7 @@ const controller = require('../controller/authController');
 router
 .get("/", controller.getAllUsers)
 .post("/signup", controller.registerNewUser) //auth/signup
-.post("/login", controller.loginUser) 
-.post("/create-token", controller.createToken) 
-.post("/decode-token", controller.decodeToken) 
+.post("/login", controller.loginUser)
 // .put("/:id", controller.updateBook)
 // .delete("/:id", controller.deleteBook);
 

@@ -1,62 +1,6 @@
 const User = require("../model/User");
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const {SECRET} = process.env;
-const expiry = 3600; //secs
-
-// test - create a token
-exports.createToken = (req, res) => {
-                    // create jwt token for user
-                    const payload = { //do not add sensitive info to the payload
-                        id: req.body.id,
-                        userName: req.body.userName
-                    };
-                    jwt.sign(
-                        payload, 
-                        SECRET, 
-                        {expiresIn: expiry},
-                        (err,token) => {
-                            if(err){
-                                console.err(err);
-                                return res.status(500).json({message: "Failed to sign token!"});
-                            }
-                            // send token to user
-                            return res.status(200).json({
-                                message: "Token Created Successfully",
-                                token,
-                                id: req.body.id,
-                                userName: req.body.userName
-                            })
-                        }
-                        );
-      
-}
-
-// test - decode a token
-exports.decodeToken = (req, res) => {
-    console.log(req.headers);
-    // pick authorization header
-    const authHeader = req.headers.authorization;
-    if(!authHeader){
-        return res.status(403).json({message: 'Authentication Token is required'});
-    }
-    // extract token
-    const splittedStr = authHeader.split(' ');
-    const token = splittedStr[1];
-    console.log(token);
-    // decode token
-    jwt.verify(token, 
-        SECRET,
-        (err, decodedToken) => {
-            if(err){
-                console.error(err);
-                return res.status(500).json({message: "Failed to verify token"});
-            }
-            return res.status(200).json({user: decodedToken});
-        }
-        )
-}
+const { createToken, decodeToken } = require("../services/jwtService");
 
 // register a user
 exports.registerNewUser = (req, res) => {
@@ -98,29 +42,15 @@ exports.registerNewUser = (req, res) => {
                         }
                     })
                     // create jwt token for user
-                    const payload = { //do not add sensitive info to the payload
-                        id: newUser._id,
-                        userName: newUser.userName,
-                        firstName: newUser.firstName,
-                        lastName: newUser.lastName,
-
-                    };
-                    jwt.sign(
-                        payload, 
-                        SECRET, 
-                        {expiresIn: expiry},
-                        (err,token) => {
-                            if(err){
-                                console.error({err});
-                                return res.status(500).json({message: "Failed to sign token!"});
-                            }
-                            // send token to user
-                            console.log(token)
-                            return res.status(200).json({
-                                message: "User Registration Successful",
-                            })
-                        }
-                        );
+                    let token = createToken(newUser);
+                    if(!token){
+                        return res.status(500).json({message: "Failed to sign token!"});
+                    }
+                    // send token to user
+                    console.log(token)
+                    return res.status(200).json({
+                        message: "User Registration Successful",
+                    })
                 })
             })
         });
@@ -165,28 +95,16 @@ exports.loginUser = (req, res) =>{
         if(!match){
             return res.status(401).json({message: "Incorrect Password"})
         }
-        // create token and send to user
-        jwt.sign(
-            { 
-                id: foundUser.id,
-                userName: foundUser.userName,
-                firstName: foundUser.firstName,
-                lastName: foundUser.lastName,
-                role: foundUser.role,
-            },
-            SECRET, 
-            {expiresIn: expiry},
-            (err, token) => {
-                if(err){
-                    console.error({err});
-                    return res.status(500).json({message: "Failed to sign token!"});
-                }
-                return res.status(200).json({
-                    message: "User Logged In Successfully",
-                    token
-                })
-            }
-        )
+        // create jwt token for user
+        let token = createToken(foundUser);
+        if(!token){
+            console.error({err});
+            return res.status(500).json({message: "Failed to sign token!"});
+        }
+        return res.status(200).json({
+            message: "User Logged In Successfully",
+            token
+        })
     })
     
 }

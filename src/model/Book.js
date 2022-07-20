@@ -10,6 +10,6 @@ const bookSchema = new Schema({
 {timestamps:true}
 );
 
-const bookModel = model("books", bookSchema);
+const bookModel = model("books", bookSchema); //books is the name of the database collecton
 
 module.exports = bookModel;
